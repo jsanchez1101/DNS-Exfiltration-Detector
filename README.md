@@ -27,5 +27,5 @@ the full attack set (294k queries across 6 payload types).
       rolling feature distributions), ensemble scoring
 - [ ] Phase 3: Live deployment to Pi Zero W with scapy sniffer +
       GPIO LED indicators
-- [ ] Phase 4 (optional): Evaluation against homelab-generated
+- [ ] Phase 4 : Evaluation against homelab-generated
       attacks using dnscat2 / iodine
