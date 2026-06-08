@@ -1,31 +1,57 @@
 # DNS Exfiltration Detector
 
-Passive DNS anomaly detection pipeline targeting an edge deployment
-on a Raspberry Pi Zero W. Work in progress.
+ML-based detection pipeline for DNS exfiltration, evaluated across
+stateless baselines, stateful windowed features, and novel attack
+tools generated in a controlled homelab.
 
 ## Status
 
-**Phase 1 of 3 complete.** Stateless Isolation Forest trained on
-CIC-Bell-DNS-EXF-2021 benign traffic (221k queries), evaluated against
-the full attack set (294k queries across 6 payload types).
+**Phase 1 complete.** Stateless Isolation Forest baseline established
+on CIC-Bell-DNS-EXF-2021 (221k benign training queries, 294k attack
+queries across 6 payload types). Phase 2 (windowed features + 
+autoencoder comparison) in progress.
 
 ## Phase 1 Results (Stateless Baseline)
 
-- Detection rate: 7.2% at 5% false positive rate
+- Detection rate: 7.2% at 5% FPR
 - Attack queries show clear feature shifts vs. benign (subdomain_length
-  +4.2, numeric +5.2, FQDN_count +6.9), but ~90% of individual attack
-  queries score within the benign distribution
-- Finding: per-query stateless features cannot reliably detect modern
-  DNS exfiltration. The signal lives in *patterns across queries* to
-  the same domain, not in any single query
-- This motivates Phase 2
+  +4.2, numeric_ratio +5.2, fqdn_count +6.9), but ~90% of individual
+  attack queries score within the benign distribution
+- **Finding:** per-query stateless features cannot reliably detect
+  modern DNS exfiltration. Signal lives in *patterns across queries*
+  to the same domain, not in any single query
+- This is an honest baseline, not a target — it defines what Phase 2
+  needs to beat
+
+## Infrastructure
+
+Two-node homelab built for isolated detection research:
+- **node1** (Ubuntu 26.04): ML inference, feature engineering, model 
+  training
+- **node2** (EVE-NG 6.2): virtualized attacker/victim topology for 
+  Phase 4 attack generation
+- Tailscale mesh connecting both nodes + dev machine for remote 
+  access regardless of subnet
+- tcpdump captures from both hosts feed real-world benign traffic 
+  into the evaluation pipeline (separate from synthetic CIC-Bell 
+  benign, to surface model drift)
 
 ## Roadmap
 
-- [x] Phase 1: Stateless Isolation Forest baseline
-- [ ] Phase 2: Stateful windowed features (per-domain query rate,
-      rolling feature distributions), ensemble scoring
-- [ ] Phase 3: Live deployment to Pi Zero W with scapy sniffer +
-      GPIO LED indicators
-- [ ] Phase 4 : Evaluation against homelab-generated
-      attacks using dnscat2 / iodine
+- [x] **Phase 1:** Stateless Isolation Forest baseline
+- [ ] **Phase 2:** Stateful windowed features (per-domain query rate,
+      rolling distributions), autoencoder comparison vs. IF
+- [ ] **Phase 3:** Real-world FPR evaluation against captured benign 
+      traffic from production hosts; document concrete model drift 
+      sources (mDNS, DoH, telemetry bursts)
+- [ ] **Phase 4:** Generalization evaluation against novel attack 
+      tools (dnscat2, iodine) inside the EVE-NG topology — tests 
+      whether the detector handles attack variants outside its 
+      training distribution
+
+## Stack
+
+- Python (pandas, scikit-learn, PyTorch for autoencoder)
+- Scapy / tcpdump for packet capture and parsing
+- Zeek (planned) for production-shaped telemetry layer
+- Docker (planned) for reproducible deployment
