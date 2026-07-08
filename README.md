@@ -2,7 +2,10 @@
 
 ML-based detection pipeline for DNS exfiltration, evaluated across
 stateless baselines, stateful windowed features, and novel attack
-tools generated in a controlled homelab.
+tools generated in a controlled homelab. 
+This is the classical-ML portion of a two-project cyber+ML portfolio with the other
+half being agentic/LLM based: [Local LLM Network Agent](https://github.com/jsanchez1101/Homelab-netops-agent).
+Both run on the same self-built homelab.
 
 ## Status
 
